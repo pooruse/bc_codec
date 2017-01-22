@@ -5,7 +5,7 @@
 #include "sample_table.h"
 
 #define NUM_OF_SAMPLE 256
-#define NUM_OF_PICKS 1
+#define NUM_OF_PICKS 5
 
 uint8_t x[NUM_OF_SAMPLE];
 
@@ -45,6 +45,11 @@ int main(int argc, char **argv)
 	// read input file
 	rlen  = fread(r_buf, 1, NUM_OF_PICKS, infile);
 
+	// clear x array
+	for(i = 0; i < NUM_OF_SAMPLE; i++){
+	    x[i] = 0;
+	}
+	
 	// freqency domain -> time domain
 	base_fcy = 1 / ((double)NUM_OF_SAMPLE / 8000.0);
 	for(i = 0; i < NUM_OF_PICKS; i++){
@@ -55,7 +60,8 @@ int main(int argc, char **argv)
 	    for(j = 0; j < NUM_OF_SAMPLE; j++){
 		quantization = 255.0 * (1 + cos(d_tmp * (double)j));
 		quantization /= 2;
-		x[j] = (uint8_t)quantization;
+		quantization /= NUM_OF_PICKS;
+		x[j] += (uint8_t)quantization;
 	    }
 	}
 

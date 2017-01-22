@@ -5,4 +5,7 @@ echo "encoding..."
 echo "decoding..."
 ./decode.exe $2 $3
 
+echo "generate player sample..."
+ffmpeg -ar 8000 -ac 1 -f u8 -i $3 $4
+
 echo "finish"

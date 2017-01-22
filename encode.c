@@ -5,7 +5,7 @@
 #include "sample_table.h"
 
 #define NUM_OF_SAMPLE 256
-#define NUM_OF_PICKS 1
+#define NUM_OF_PICKS 5
 
 uint8_t x[NUM_OF_SAMPLE];
 double X[SIZE_OF_SAMPLE_TABLE];
