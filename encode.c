@@ -5,7 +5,7 @@
 #include "sample_table.h"
 
 #define NUM_OF_SAMPLE 256
-#define NUM_OF_PICKS 80
+#define NUM_OF_PICKS 2
 
 uint8_t x[NUM_OF_SAMPLE];
 double X[SIZE_OF_SAMPLE_TABLE];
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 	    d_tmp = 2.0 * M_PI * d_tmp / NUM_OF_SAMPLE;
 	    
 	    for(j = 0; j < rlen; j++){
-		X[i] += (x[j] * cos(d_tmp * (double)j)) / SIZE_OF_SAMPLE_TABLE;
+		X[i] += (x[j] * cos(d_tmp * (double)j)) / NUM_OF_SAMPLE;
 	    }
 	}
 
