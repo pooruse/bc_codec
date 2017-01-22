@@ -5,7 +5,7 @@
 #include "sample_table.h"
 
 #define NUM_OF_SAMPLE 256
-#define NUM_OF_PICKS 5
+#define NUM_OF_PICKS 80
 
 uint8_t x[NUM_OF_SAMPLE];
 double X[SIZE_OF_SAMPLE_TABLE];
@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 {
     FILE *infile;
     FILE *outfile;
-    uint8_t w_buf[NUM_OF_PICKS];
+    uint8_t w_buf[NUM_OF_PICKS * 2];
     int rlen;
     int i, j;
     double d_tmp;
@@ -53,13 +53,13 @@ int main(int argc, char **argv)
 	
 	// time domain -> freqency domain
 	base_fcy = 1.0 / ((double)NUM_OF_SAMPLE / 8000.0);
-	for(i = 0; i < SIZE_OF_SAMPLE_TABLE; i++){
+	for(i = 1; i < SIZE_OF_SAMPLE_TABLE; i++){
 	    
 	    d_tmp = (double)sample_table[i] / base_fcy;
 	    d_tmp = 2.0 * M_PI * d_tmp / NUM_OF_SAMPLE;
 	    
 	    for(j = 0; j < rlen; j++){
-		X[i] += x[j] * cos(d_tmp * (double)j);
+		X[i] += (x[j] * cos(d_tmp * (double)j)) / SIZE_OF_SAMPLE_TABLE;
 	    }
 	}
 
@@ -74,11 +74,12 @@ int main(int argc, char **argv)
 		    pick_index = j;
 		}
 	    }
-	    w_buf[i] = (uint8_t) pick_index;
+	    w_buf[i * 2] = (uint8_t)pick_index;
+	    w_buf[i * 2 + 1] = (uint8_t)d_tmp;
 	    X[pick_index] = 0;
 	}
 
-	fwrite(w_buf, 1, NUM_OF_PICKS, outfile);
+	fwrite(w_buf, 1, NUM_OF_PICKS * 2, outfile);
 	
 	// end condition
 	if(rlen != NUM_OF_SAMPLE){
