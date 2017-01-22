@@ -52,9 +52,9 @@ int main(int argc, char **argv)
 	}
 	
 	// freqency domain -> time domain
-	for(i = 0; i < NUM_OF_BASE_BAND; i++){
+	for(i = 0; i < NUM_OF_SAMPLE; i++){
 
-	    d_tmp = M_PI / NUM_OF_SAMPLE * (i + 0.5);
+	    d_tmp = M_PI / NUM_OF_BASE_BAND * (i + 0.5);
 	    for(j = 0; j < NUM_OF_SAMPLE; j++){
 		cos_res = cos(d_tmp * (double)j);
 		x[i] += (double)X[j] * cos_res;
