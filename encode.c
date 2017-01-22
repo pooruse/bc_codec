@@ -5,20 +5,19 @@
 #include "sample_table.h"
 
 #define NUM_OF_SAMPLE 256
-#define NUM_OF_PICKS 2
+#define NUM_OF_BASE_BAND 256
 
-uint8_t x[NUM_OF_SAMPLE];
-double X[SIZE_OF_SAMPLE_TABLE];
+int8_t x[NUM_OF_SAMPLE];
+double X[NUM_OF_BASE_BAND];
 
 int main(int argc, char **argv)
 {
     FILE *infile;
     FILE *outfile;
-    uint8_t w_buf[NUM_OF_PICKS * 2];
     int rlen;
     int i, j;
     double d_tmp;
-    double base_fcy;
+    double cos_res;
     int pick_index;
 
     // check parameter format
@@ -52,34 +51,29 @@ int main(int argc, char **argv)
 	}
 	
 	// time domain -> freqency domain
-	base_fcy = 1.0 / ((double)NUM_OF_SAMPLE / 8000.0);
-	for(i = 1; i < SIZE_OF_SAMPLE_TABLE; i++){
-	    
-	    d_tmp = (double)sample_table[i] / base_fcy;
-	    d_tmp = 2.0 * M_PI * d_tmp / NUM_OF_SAMPLE;
-	    
+	for(i = 0; i < NUM_OF_BASE_BAND; i++){
+
+	    d_tmp = i * M_PI / NUM_OF_SAMPLE;
 	    for(j = 0; j < rlen; j++){
-		X[i] += (x[j] * cos(d_tmp * (double)j)) / NUM_OF_SAMPLE;
-	    }
-	}
-
-	// pick the most top freqencies
-	for(i = 0; i < NUM_OF_PICKS; i++){
-	    d_tmp = -DBL_MAX;
-
-	    // j start with 1, because we ignore frequency 0
-	    for(j = 1; j < SIZE_OF_SAMPLE_TABLE; j++){
-		if(d_tmp < X[j]){
-		    d_tmp = X[j];
-		    pick_index = j;
+		
+		cos_res = cos(d_tmp * ((double)j + 0.5));
+		X[i] += (double)x[j] * cos_res;
+		/*
+		if(i == 64){
+		    printf("%d %04d * %f = %f\n",
+			   i,
+			   x[j],
+			   cos_res,
+			   (double)x[j] * cos_res);
 		}
+		*/
 	    }
-	    w_buf[i * 2] = (uint8_t)pick_index;
-	    w_buf[i * 2 + 1] = (uint8_t)d_tmp;
-	    X[pick_index] = 0;
+	    
+	    X[i] /= NUM_OF_SAMPLE;
+	    //printf("%3d %f\n",i , X[i]);
 	}
-
-	fwrite(w_buf, 1, NUM_OF_PICKS * 2, outfile);
+	
+	fwrite(X, sizeof(double), NUM_OF_BASE_BAND, outfile);
 	
 	// end condition
 	if(rlen != NUM_OF_SAMPLE){

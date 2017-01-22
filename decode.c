@@ -5,20 +5,20 @@
 #include "sample_table.h"
 
 #define NUM_OF_SAMPLE 256
-#define NUM_OF_PICKS 2
+#define NUM_OF_BASE_BAND 256
 
-uint8_t x[NUM_OF_SAMPLE];
+double X[NUM_OF_BASE_BAND];
+double x[NUM_OF_SAMPLE];
+int8_t x_q[NUM_OF_SAMPLE];
 
 int main(int argc, char **argv)
 {
     FILE *infile;
     FILE *outfile;
-    uint8_t r_buf[NUM_OF_PICKS * 2];
     int rlen;
     int i, j;
+    double cos_res;
     double d_tmp;
-    double quantization;
-    double base_fcy;
 
     // check parameter format
     if(argc < 3){
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 
     while(1){
 	// read input file
-	rlen  = fread(r_buf, 1, NUM_OF_PICKS * 2, infile);
+	rlen  = fread(X, sizeof(double), NUM_OF_BASE_BAND, infile);
 
 	// clear x array
 	for(i = 0; i < NUM_OF_SAMPLE; i++){
@@ -51,22 +51,25 @@ int main(int argc, char **argv)
 	}
 	
 	// freqency domain -> time domain
-	base_fcy = 1 / ((double)NUM_OF_SAMPLE / 8000.0);
-	for(i = 0; i < NUM_OF_PICKS; i++){
-	    
-	    d_tmp = (double)sample_table[r_buf[i * 2]] / base_fcy;
-	    d_tmp = 2.0 * M_PI * d_tmp / NUM_OF_SAMPLE;
-	    
+	for(i = 0; i < NUM_OF_BASE_BAND; i++){
+
+	    d_tmp = M_PI / NUM_OF_SAMPLE * (i + 0.5);
 	    for(j = 0; j < NUM_OF_SAMPLE; j++){
-		quantization = r_buf[i * 2 + 1] * (cos(d_tmp * (double)j));
-		x[j] += (uint8_t)quantization;
+		cos_res = cos(d_tmp * (double)j);
+		x[i] += (double)X[j] * cos_res;
 	    }
 	}
 
-	fwrite(x, 1, NUM_OF_SAMPLE, outfile);
+	// quantilization
+	for(i = 0; i < NUM_OF_SAMPLE; i++){
+	    x_q[i] = (int8_t)x[i] * 2;
+	    printf("%d\n", x_q[i]);
+	}
+	
+	fwrite(x_q, 1, NUM_OF_SAMPLE, outfile);
 	
 	// end condition
-	if(rlen != NUM_OF_PICKS * 2){
+	if(rlen != NUM_OF_BASE_BAND){
 	    break;
 	}
     }
