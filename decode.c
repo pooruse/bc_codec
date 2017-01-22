@@ -11,6 +11,7 @@ double X[NUM_OF_BASE_BAND];
 double x[NUM_OF_SAMPLE];
 int8_t x_q[NUM_OF_SAMPLE];
 
+
 int main(int argc, char **argv)
 {
     FILE *infile;
@@ -63,7 +64,7 @@ int main(int argc, char **argv)
 	// quantilization
 	for(i = 0; i < NUM_OF_SAMPLE; i++){
 	    x_q[i] = (int8_t)x[i] * 2;
-	    printf("%d\n", x_q[i]);
+	    //printf("%d\n", x_q[i]);
 	}
 	
 	fwrite(x_q, 1, NUM_OF_SAMPLE, outfile);
