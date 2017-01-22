@@ -8,22 +8,21 @@
 #define NUM_OF_PICKS 1
 
 uint8_t x[NUM_OF_SAMPLE];
-double X[SIZE_OF_SAMPLE_TABLE];
 
 int main(int argc, char **argv)
 {
     FILE *infile;
     FILE *outfile;
-    uint8_t w_buf[NUM_OF_PICKS];
+    uint8_t r_buf[NUM_OF_PICKS];
     int rlen;
     int i, j;
     double d_tmp;
+    double quantization;
     double base_fcy;
-    int pick_index;
 
     // check parameter format
     if(argc < 3){
-	printf("usage: encode [SRC] [DST]\n");
+	printf("usage: decode [SRC] [DST]\n");
 	return 0;
     }
 
@@ -44,44 +43,26 @@ int main(int argc, char **argv)
 
     while(1){
 	// read input file
-	rlen  = fread(x, 1, NUM_OF_SAMPLE, infile);
+	rlen  = fread(r_buf, 1, NUM_OF_PICKS, infile);
 
-	// clear X sample table
-	for(i = 0; i < SIZE_OF_SAMPLE_TABLE; i++){
-	    X[i] = 0;
-	}
-	
-	// time domain -> freqency domain
-	base_fcy = 1.0 / ((double)NUM_OF_SAMPLE / 8000.0);
-	for(i = 0; i < SIZE_OF_SAMPLE_TABLE; i++){
+	// freqency domain -> time domain
+	base_fcy = 1 / ((double)NUM_OF_SAMPLE / 8000.0);
+	for(i = 0; i < NUM_OF_PICKS; i++){
 	    
-	    d_tmp = (double)sample_table[i] / base_fcy;
+	    d_tmp = (double)sample_table[r_buf[i]] / base_fcy;
 	    d_tmp = 2.0 * M_PI * d_tmp / NUM_OF_SAMPLE;
 	    
-	    for(j = 0; j < rlen; j++){
-		X[i] += x[j] * cos(d_tmp * (double)j);
+	    for(j = 0; j < NUM_OF_SAMPLE; j++){
+		quantization = 255.0 * (1 + cos(d_tmp * (double)j));
+		quantization /= 2;
+		x[j] = (uint8_t)quantization;
 	    }
 	}
 
-	// pick the most top freqencies
-	for(i = 0; i < NUM_OF_PICKS; i++){
-	    d_tmp = -DBL_MAX;
-
-	    // j start with 1, because we ignore frequency 0
-	    for(j = 1; j < SIZE_OF_SAMPLE_TABLE; j++){
-		if(d_tmp < X[j]){
-		    d_tmp = X[j];
-		    pick_index = j;
-		}
-	    }
-	    w_buf[i] = (uint8_t) pick_index;
-	    X[pick_index] = 0;
-	}
-
-	fwrite(w_buf, 1, NUM_OF_PICKS, outfile);
+	fwrite(x, 1, NUM_OF_SAMPLE, outfile);
 	
 	// end condition
-	if(rlen != NUM_OF_SAMPLE){
+	if(rlen != NUM_OF_PICKS){
 	    break;
 	}
     }
