@@ -4,10 +4,12 @@
 #include <float.h>
 #include "sample_table.h"
 
+#define in_t int16_t
+
 #define NUM_OF_SAMPLE 256
 #define NUM_OF_BASE_BAND 256
 
-double X[NUM_OF_BASE_BAND];
+in_t X[NUM_OF_BASE_BAND];
 double x[NUM_OF_SAMPLE];
 int8_t x_q[NUM_OF_SAMPLE];
 
@@ -19,7 +21,7 @@ int main(int argc, char **argv)
     int rlen;
     int i, j;
     double cos_res;
-    double d_tmp;
+    double d_tmp, d_tmp2;
 
     // check parameter format
     if(argc < 3){
@@ -44,7 +46,7 @@ int main(int argc, char **argv)
 
     while(1){
 	// read input file
-	rlen  = fread(X, sizeof(double), NUM_OF_BASE_BAND, infile);
+	rlen  = fread(X, sizeof(in_t), NUM_OF_BASE_BAND, infile);
 
 	// clear x array
 	for(i = 0; i < NUM_OF_SAMPLE; i++){
@@ -57,7 +59,9 @@ int main(int argc, char **argv)
 	    d_tmp = M_PI / NUM_OF_BASE_BAND * (i + 0.5);
 	    for(j = 0; j < NUM_OF_SAMPLE; j++){
 		cos_res = cos(d_tmp * (double)j);
-		x[i] += (double)X[j] * cos_res;
+		d_tmp2 = (double)X[j];
+		d_tmp2 /= 100;
+		x[i] += d_tmp2 * cos_res;
 	    }
 	}
 

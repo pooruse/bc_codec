@@ -4,11 +4,14 @@
 #include <float.h>
 #include "sample_table.h"
 
+#define out_t int16_t
+
 #define NUM_OF_SAMPLE 256
 #define NUM_OF_BASE_BAND 256
 
 int8_t x[NUM_OF_SAMPLE];
 double X[NUM_OF_BASE_BAND];
+out_t X_q[NUM_OF_BASE_BAND];
 
 int main(int argc, char **argv)
 {
@@ -70,11 +73,14 @@ int main(int argc, char **argv)
 	    }
 	    
 	    X[i] /= NUM_OF_SAMPLE;
+	    X_q[i] = (out_t)(X[i] * 100);
+
+	    //printf("X_q = %d X = %f\n",X_q[i], X[i]);
 	    //printf("%3d %f\n",i , X[i]);
 	}
 	
 	
-	fwrite(X, sizeof(double), NUM_OF_BASE_BAND, outfile);
+	fwrite(X_q, sizeof(out_t), NUM_OF_BASE_BAND, outfile);
 	
 	// end condition
 	if(rlen != NUM_OF_SAMPLE){
