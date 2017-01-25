@@ -73,6 +73,7 @@ int main(int argc, char **argv)
 	    //printf("%3d %f\n",i , X[i]);
 	}
 	
+	
 	fwrite(X, sizeof(double), NUM_OF_BASE_BAND, outfile);
 	
 	// end condition

@@ -15,4 +15,4 @@ decode: decode.o sample_table.o
 .PHONY: clean
 
 clean:
-	-rm *.o decode.exe encode.exe
+	-rm *.o decode encode
