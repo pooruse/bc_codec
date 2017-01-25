@@ -61,22 +61,10 @@ int main(int argc, char **argv)
 		
 		cos_res = cos(d_tmp * ((double)j + 0.5));
 		X[i] += (double)x[j] * cos_res;
-		/*
-		if(i == 64){
-		    printf("%d %04d * %f = %f\n",
-			   i,
-			   x[j],
-			   cos_res,
-			   (double)x[j] * cos_res);
-		}
-		*/
 	    }
 	    
 	    X[i] /= NUM_OF_SAMPLE;
 	    X_q[i] = (out_t)(X[i] * 100);
-
-	    //printf("X_q = %d X = %f\n",X_q[i], X[i]);
-	    //printf("%3d %f\n",i , X[i]);
 	}
 	
 	
