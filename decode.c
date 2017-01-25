@@ -8,10 +8,13 @@
 
 #define NUM_OF_SAMPLE 256
 #define NUM_OF_BASE_BAND 256
+#define NUM_OF_PICK 20
 
+in_t input_buf[NUM_OF_PICK * 2];
 in_t X[NUM_OF_BASE_BAND];
 double x[NUM_OF_SAMPLE];
 int8_t x_q[NUM_OF_SAMPLE];
+
 
 
 int main(int argc, char **argv)
@@ -46,8 +49,17 @@ int main(int argc, char **argv)
 
     while(1){
 	// read input file
-	rlen  = fread(X, sizeof(in_t), NUM_OF_BASE_BAND, infile);
+	rlen  = fread(input_buf, sizeof(in_t), NUM_OF_PICK * 2, infile);
 
+	// prepare X
+	for(i = 0; i < NUM_OF_BASE_BAND; i++){
+	    X[i] = 0;
+	}
+
+	for(i = 0; i < NUM_OF_PICK; i++){
+	    X[input_buf[i * 2]] = input_buf[i * 2 + 1];
+	}
+	
 	// clear x array
 	for(i = 0; i < NUM_OF_SAMPLE; i++){
 	    x[i] = 0;
@@ -74,7 +86,7 @@ int main(int argc, char **argv)
 	fwrite(x_q, 1, NUM_OF_SAMPLE, outfile);
 	
 	// end condition
-	if(rlen != NUM_OF_BASE_BAND){
+	if(rlen != (NUM_OF_PICK * 2)){
 	    break;
 	}
     }

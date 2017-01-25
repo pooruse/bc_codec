@@ -1,5 +1,6 @@
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <float.h>
 #include "sample_table.h"
@@ -8,10 +9,12 @@
 
 #define NUM_OF_SAMPLE 256
 #define NUM_OF_BASE_BAND 256
+#define NUM_OF_PICK 20
 
 int8_t x[NUM_OF_SAMPLE];
 double X[NUM_OF_BASE_BAND];
 out_t X_q[NUM_OF_BASE_BAND];
+out_t output_buf[NUM_OF_PICK * 2];
 
 int main(int argc, char **argv)
 {
@@ -22,7 +25,9 @@ int main(int argc, char **argv)
     double d_tmp;
     double cos_res;
     int pick_index;
-
+    out_t out_tmp;
+    int out_index;
+    
     // check parameter format
     if(argc < 3){
 	printf("usage: encode [SRC] [DST]\n");
@@ -66,9 +71,23 @@ int main(int argc, char **argv)
 	    X[i] /= NUM_OF_SAMPLE;
 	    X_q[i] = (out_t)(X[i] * 100);
 	}
-	
-	
-	fwrite(X_q, sizeof(out_t), NUM_OF_BASE_BAND, outfile);
+
+	// pick important freqencies
+	for(i = 0; i < NUM_OF_PICK; i++){
+	    out_tmp = 0;
+	    for(j = 0; j < NUM_OF_BASE_BAND; j++){
+		if(out_tmp < fabs(X_q[j])){
+		    out_tmp = fabs(X_q[j]);
+		    out_index = j;
+		}
+	    }
+	    output_buf[2 * i] = out_index;
+	    output_buf[2 * i + 1] = X_q[out_index];
+	    X_q[out_index] = 0;
+	}
+
+	// write file
+	fwrite(output_buf, sizeof(out_t), NUM_OF_PICK * 2, outfile);
 	
 	// end condition
 	if(rlen != NUM_OF_SAMPLE){
