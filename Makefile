@@ -3,6 +3,9 @@ CFLAGS=-g3
 
 all: decode encode
 
+reader: reader.o
+	gcc $^ $(CFLAGS) -o $@ $(LDFLAGS)
+
 encode: encode.o sample_table.o
 	gcc $^ $(CFLAGS) -o $@ $(LDFLAGS)
 

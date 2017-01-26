@@ -9,7 +9,12 @@
 
 #define NUM_OF_SAMPLE 256
 #define NUM_OF_BASE_BAND 256
-#define NUM_OF_PICK 20
+#define NUM_OF_PICK 1
+
+struct pick_buf_t {
+    double X;
+    int band;
+}pick_buf[NUM_OF_PICK];
 
 int8_t x[NUM_OF_SAMPLE];
 double X[NUM_OF_BASE_BAND];
@@ -25,7 +30,7 @@ int main(int argc, char **argv)
     double d_tmp;
     double cos_res;
     int pick_index;
-    out_t out_tmp;
+    double out_tmp;
     int out_index;
     
     // check parameter format
@@ -69,23 +74,29 @@ int main(int argc, char **argv)
 	    }
 	    
 	    X[i] /= NUM_OF_SAMPLE;
-	    X_q[i] = (out_t)(X[i] * 100);
 	}
 
 	// pick important freqencies
 	for(i = 0; i < NUM_OF_PICK; i++){
 	    out_tmp = 0;
-	    for(j = 0; j < NUM_OF_BASE_BAND; j++){
-		if(out_tmp < fabs(X_q[j])){
-		    out_tmp = fabs(X_q[j]);
+	    for(j = 1; j < NUM_OF_BASE_BAND; j++){
+		if(out_tmp < fabs(X[j])){
+		    out_tmp = fabs(X[j]);
 		    out_index = j;
 		}
 	    }
-	    output_buf[2 * i] = out_index;
-	    output_buf[2 * i + 1] = X_q[out_index];
-	    X_q[out_index] = 0;
+	    pick_buf[i].band = out_index;
+	    pick_buf[i].X = X[out_index];
+	    X[out_index] = 0;
 	}
 
+	// quantization
+	for(i = 0; i < NUM_OF_PICK; i++){
+	    output_buf[i * 2] = pick_buf[i].band;
+	    out_tmp = pick_buf[i].X * 100;
+	    output_buf[i * 2 + 1] = (out_t)out_tmp;
+	}
+	
 	// write file
 	fwrite(output_buf, sizeof(out_t), NUM_OF_PICK * 2, outfile);
 	

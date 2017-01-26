@@ -8,14 +8,12 @@
 
 #define NUM_OF_SAMPLE 256
 #define NUM_OF_BASE_BAND 256
-#define NUM_OF_PICK 20
+#define NUM_OF_PICK 1
 
 in_t input_buf[NUM_OF_PICK * 2];
 in_t X[NUM_OF_BASE_BAND];
 double x[NUM_OF_SAMPLE];
 int8_t x_q[NUM_OF_SAMPLE];
-
-
 
 int main(int argc, char **argv)
 {
@@ -24,6 +22,7 @@ int main(int argc, char **argv)
     int rlen;
     int i, j;
     double cos_res;
+    int cos_i;
     double d_tmp, d_tmp2;
 
     // check parameter format
@@ -66,11 +65,21 @@ int main(int argc, char **argv)
 	}
 	
 	// freqency domain -> time domain
+	
 	for(i = 0; i < NUM_OF_SAMPLE; i++){
 
-	    d_tmp = M_PI / NUM_OF_BASE_BAND * (i + 0.5);
+	    if(i != 0){
+		d_tmp = M_PI / NUM_OF_BASE_BAND * (i);
+	    } else {
+		d_tmp = 0;
+	    }
+	    
+	    cos_i = 0;
 	    for(j = 0; j < NUM_OF_SAMPLE; j++){
-		cos_res = cos(d_tmp * (double)j);
+
+		d_tmp2 = d_tmp * (double)cos_i;
+		cos_i++;
+		cos_res = cos(d_tmp2);
 		d_tmp2 = (double)X[j];
 		d_tmp2 /= 100;
 		x[i] += d_tmp2 * cos_res;
@@ -79,8 +88,7 @@ int main(int argc, char **argv)
 
 	// quantilization
 	for(i = 0; i < NUM_OF_SAMPLE; i++){
-	    x_q[i] = (int8_t)x[i] * 2;
-	    //printf("%d\n", x_q[i]);
+	    x_q[i] = (int8_t)x[i] * 3.5;
 	}
 	
 	fwrite(x_q, 1, NUM_OF_SAMPLE, outfile);
