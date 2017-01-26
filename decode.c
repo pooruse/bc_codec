@@ -8,7 +8,7 @@
 
 #define NUM_OF_SAMPLE 256
 #define NUM_OF_BASE_BAND 256
-#define NUM_OF_PICK 1
+#define NUM_OF_PICK 256
 
 in_t input_buf[NUM_OF_PICK * 2];
 in_t X[NUM_OF_BASE_BAND];
@@ -22,7 +22,6 @@ int main(int argc, char **argv)
     int rlen;
     int i, j;
     double cos_res;
-    int cos_i;
     double d_tmp, d_tmp2;
 
     // check parameter format
@@ -74,11 +73,9 @@ int main(int argc, char **argv)
 		d_tmp = 0;
 	    }
 	    
-	    cos_i = 0;
 	    for(j = 0; j < NUM_OF_SAMPLE; j++){
 
-		d_tmp2 = d_tmp * (double)cos_i;
-		cos_i++;
+		d_tmp2 = d_tmp * (double)j;
 		cos_res = cos(d_tmp2);
 		d_tmp2 = (double)X[j];
 		d_tmp2 /= 100;
@@ -88,7 +85,7 @@ int main(int argc, char **argv)
 
 	// quantilization
 	for(i = 0; i < NUM_OF_SAMPLE; i++){
-	    x_q[i] = (int8_t)x[i] * 3.5;
+	    x_q[i] = (int8_t)x[i];
 	}
 	
 	fwrite(x_q, 1, NUM_OF_SAMPLE, outfile);

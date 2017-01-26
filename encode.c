@@ -9,7 +9,7 @@
 
 #define NUM_OF_SAMPLE 256
 #define NUM_OF_BASE_BAND 256
-#define NUM_OF_PICK 1
+#define NUM_OF_PICK 256
 
 struct pick_buf_t {
     double X;
